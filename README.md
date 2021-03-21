@@ -1,5 +1,5 @@
 # Mintworthy.art
 
-![banner](banner.jpg)
+![collage](collage.gif)
 
-See the demo here: [mintworthy.art](https://www.mintworthy.art)
+[mintworthy.art](https://www.mintworthy.art)
