@@ -14,15 +14,14 @@ assets_dir = "assets/"
 extension = ".png"
 
 
-# construct_path constructs the path for the assets. Reads the number of files on the given layer
+# construct_path constructs the path for the assets.
+# Reads the number of files on the given layer
 # and uses one with equal probability
 def construct_path(layer):
     path, dirs, files = next(os.walk(assets_dir + "L" + str(layer)))
     file_count = len(files)
-    print(file_count)
     generated_path = assets_dir + "L" + str(layer) + "/" + "l" + str(
         layer) + "b" + str(randint(1, file_count)) + extension
-    print(generated_path)
     return generated_path
 
 
@@ -48,20 +47,16 @@ def rnd_coordinates():
     return [x, y]
 
 
-# draw_words writes a word given the string to write, the layer to write it on, the size of the font and the coordinates
-def draw_words(str_to_draw, layer, size, x, y):
+# draw_words writes a word given the string to write,
+# the layer to write it on, the size of the font and
+# the coordinates
+def draw_words(str_to_draw, layer, size, color, x, y):
     draw = ImageDraw.Draw(layer)
     font = ImageFont.truetype("FredokaOne-Regular.ttf", size)
-    draw.text((x, y), str_to_draw, (256, 256, 256), font=font)
+    draw.text((x, y), str_to_draw, "#" + color, font=font)
 
 
-# todo refactor draw_words to accept color as arg
-def draw_hash(str_to_draw, layer, size, x, y):
-    draw = ImageDraw.Draw(layer)
-    font = ImageFont.truetype("FredokaOne-Regular.ttf", size)
-    draw.text((x, y), str_to_draw, "#bbbbbb", font=font)
-
-
+# draw_multiline draws a string and respects the newlines
 def draw_multiline(str_to_draw, layer, size, x, y):
     draw = ImageDraw.Draw(layer)
     font = ImageFont.truetype("FredokaOne-Regular.ttf", size)
@@ -85,7 +80,8 @@ def draw_circle(layer, x, y):
                                             len(colors) - 1)])
 
 
-# place_coord creates the coordinates needed to place an in image on the desired position
+# place_coord creates the coordinates needed to
+# place an in image on the desired position
 # needs some experimentation. See examples below.
 # x,y  grow from up to bottom
 # if you want to place an item on the bottom right corner
@@ -101,14 +97,12 @@ def place_coord(on_layer, x_perc, y_perc):
 def get_block_hash():
     block = w3.eth.get_block('latest')
     hash = block.hash.hex()
-    print(hash)
+    print("generated on ⏱ : " + hash)
     return hash
 
 
 bg = Image.open(construct_path(1))
 insect = Image.open(construct_path(2))
-# l3=Image.open(construct_path(3))
-# thesaurus=Image.open(construct_path(4))
 plant = Image.open(construct_path(5))
 signature = Image.open("assets/signature.png")
 logo = Image.open("assets/logo.png")
@@ -119,7 +113,7 @@ border = Image.new('RGB', (int(bg.size[0] * 1.1), int(bg.size[1] * 1.1)),
 
 colors = [
     'a1cae2', 'c2b092', 'cfc5a5', 'eae3c8', 'ffaec0', 'ffd384', 'ffab73',
-    'e4bad4', 'f6dfeb', 'edffec', 'caf7e3'
+    'e4bad4', 'f6dfeb', 'caf7e3'
 ]
 colored_blank_image = Image.new('RGB', (int(bg.size[0]), int(bg.size[1])),
                                 color='#' + colors[randint(0,
@@ -131,11 +125,8 @@ draw_circle(bg, x_circle, y_circle)
 bg.paste(insect, (rnd_coordinates()), insect.convert("RGBA"))
 insect = Image.open(construct_path(2))
 bg.paste(insect, (rnd_coordinates()), insect.convert("RGBA"))
+bg = glitcher.glitch_image(bg, 8, color_offset=True)
 bg.paste(plant, (rnd_coordinates()), plant.convert("RGBA"))
-
-# base.paste(l3, (0,400), l3.convert("RGBA"))
-# bg.paste(thesaurus, (500,200), thesaurus.convert("RGBA"))
-# l1.paste(texture, (x, y), texture)
 
 # draw .word
 words = [
@@ -145,7 +136,7 @@ words = [
     '.meditate', '.reflect', '.express'
 ]
 x, y = place_coord(bg, 0.05, 0.9)
-draw_words(words[randint(0, len(words) - 1)], bg, 256, x, y)
+draw_words(words[randint(0, len(words) - 1)], bg, 256, "ffffff", x, y)
 
 # draw one letter
 letters = [
@@ -153,10 +144,13 @@ letters = [
     'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
 ]
 x_letter, y_letter = place_coord(bg, 0.75, 0.02)
-draw_words(letters[randint(0, len(letters) - 1)], bg, 512, x_letter, y_letter)
+draw_words(letters[randint(0,
+                           len(letters) - 1)], bg, 512, "ffffff", x_letter,
+           y_letter)
 
 #draw number next to letter
-draw_words(str(randint(0, 100)), bg, 96, x_letter * 1.2, y_letter * 1.5)
+draw_words(str(randint(0, 100)), bg, 96, "ffffff", x_letter * 1.2,
+           y_letter * 1.5)
 
 # draw multiline text
 x, y = place_coord(bg, 0.2, 0.4)
@@ -173,8 +167,6 @@ phrases = [
 x, y = place_coord(bg, 0.1, 0.1)
 draw_multiline(phrases[randint(0, len(phrases) - 1)], bg, 128, x, y_letter * 2)
 
-# base=glitcher.glitch_image(base, 3, color_offset=True)
-
 border.paste(bg, (int(border.size[0] * 0.045), int(border.size[1] * 0.035)),
              bg.convert("RGBA"))
 
@@ -186,9 +178,10 @@ border.paste(logo, place_coord(border, 0.68, 0.943), logo.convert("RGBA"))
 
 # draw hash
 x, y = place_coord(border, 0.045, 0.96)
-draw_hash(get_block_hash(), border, 32, x, y)
-border.show()
+draw_words(get_block_hash(), border, 32, "bbbbbb", x, y)
+# border.show()
 
-# reduce the generated image size. Reduce is not compress. Reduce touches the resolution
-border = border.reduce(2)
+# reduce the generated image size. Reduce is not compress.
+# Reduce touches the resolution.
+# border = border.reduce(3)
 border.save("generated/" + str(uuid.uuid1()) + ".png")
