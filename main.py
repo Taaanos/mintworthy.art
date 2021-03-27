@@ -17,17 +17,7 @@ font = "FredokaOne-Regular.ttf"
 colors = np.genfromtxt('colors.csv', dtype=str).tolist()
 words = np.genfromtxt('words.csv', dtype=str).tolist()
 letters = np.genfromtxt('letters.csv', dtype=str).tolist()
-
-# questions = np.genfromtxt('questions.csv', delimiter=',', dtype=str).tolist()
-questions = [
-    'What\ninspires\nyou?', 'Am I\nusing my\ntime wisely?',
-    'Am I taking \nanything for\ngranted?',
-    'Am I employing\na healthy perspective?', 'Am I living\ntrue to myself?',
-    'Am I waking up\nin the morning ready\nto take on the day?',
-    'Am I taking\ncare of myself\nphysically?',
-    'Am I achieving\nthe goals that I have\nset for myself?',
-    'Who am I, really?'
-]
+questions = np.genfromtxt('questions.csv', delimiter="\n", dtype=str).tolist()
 
 
 # construct_path constructs the path for the assets.
@@ -72,15 +62,15 @@ def draw_words(str_to_draw, layer, size, color, x, y):
     draw.text((x, y), str_to_draw, "#" + color, font=f)
 
 
-# draw_multiline draws a string and respects the newlines
-def draw_multiline(str_to_draw, layer, size, x, y):
+# draw_multiline draws a wrapped string in a confined width
+def draw_multiline(text, layer, size, width, spacing, x, y):
     draw = ImageDraw.Draw(layer)
     f = ImageFont.truetype(font, size)
-    draw.multiline_text((x, y),
-                        str_to_draw,
-                        font=f,
-                        fill=(256, 256, 256),
-                        spacing=100)
+
+    text_list = textwrap.wrap(text, width)
+    for t in text_list:
+        draw.multiline_text((x, y), t, font=f, fill=(256, 256, 256))
+        y += spacing
 
 
 # draw_circle draws a circle on the given layer
@@ -167,7 +157,7 @@ x, y = place_coord(bg, 0.2, 0.4)
 
 x, y = place_coord(bg, 0.1, 0.1)
 draw_multiline(questions[randint(0,
-                                 len(questions) - 1)], bg, 128, x,
+                                 len(questions) - 1)], bg, 128, 20, 150, x,
                y_letter * 2)
 
 border.paste(bg, (int(border.width * 0.045), int(border.height * 0.035)),
