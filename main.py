@@ -3,17 +3,31 @@ from PIL import ImageDraw
 from PIL import ImageFont
 from random import randint
 from glitch_this import ImageGlitcher
-import utils
 import os
 import uuid
 from web3.auto.infura import w3
 import numpy as np
+import textwrap
 
 glitcher = ImageGlitcher()
 
 assets_dir = "assets/"
 extension = ".png"
 font = "FredokaOne-Regular.ttf"
+colors = np.genfromtxt('colors.csv', dtype=str).tolist()
+words = np.genfromtxt('words.csv', dtype=str).tolist()
+letters = np.genfromtxt('letters.csv', dtype=str).tolist()
+
+# questions = np.genfromtxt('questions.csv', delimiter=',', dtype=str).tolist()
+questions = [
+    'What\ninspires\nyou?', 'Am I\nusing my\ntime wisely?',
+    'Am I taking \nanything for\ngranted?',
+    'Am I employing\na healthy perspective?', 'Am I living\ntrue to myself?',
+    'Am I waking up\nin the morning ready\nto take on the day?',
+    'Am I taking\ncare of myself\nphysically?',
+    'Am I achieving\nthe goals that I have\nset for myself?',
+    'Who am I, really?'
+]
 
 
 # construct_path constructs the path for the assets.
@@ -85,7 +99,7 @@ def draw_circle(layer, x, y):
 # place_coord creates the coordinates needed to
 # place an in image on the desired position
 # needs some experimentation. See examples below.
-# x,y  grow from up to bottom
+# x,y  grow from up to bottom and right to left
 # if you want to place an item on the bottom right corner
 # the percentages would be ~ 0.70, 0.90
 def place_coord(on_layer, x_perc, y_perc):
@@ -103,6 +117,14 @@ def get_block_hash():
     return hash
 
 
+# pick_color picks a color based on the rnd and deletes it
+# from the list to avoid reusing it.
+def pick_color(rnd):
+    color = colors[rnd]
+    colors.remove(color)
+    return color
+
+
 bg = Image.open(construct_path(1))
 insect = Image.open(construct_path(2))
 plant = Image.open(construct_path(5))
@@ -112,10 +134,10 @@ logo = Image.open("assets/logo.png")
 # Create image to be used as layer0 to become the borders of the final canvas
 border = Image.new(bg.mode, (int(bg.width * 1.1), int(bg.height * 1.1)),
                    color='white')
-colors = np.genfromtxt('colors.csv', dtype=str)
 colored_blank_image = Image.new(bg.mode, (int(bg.width), int(bg.height)),
-                                color='#' + colors[randint(0,
-                                                           len(colors) - 1)])
+                                color='#' +
+                                pick_color(randint(0,
+                                                   len(colors) - 1)))
 bg = colored_blank_image
 
 x_circle, y_circle = place_coord(bg, 0.2, 0.2)
@@ -127,12 +149,10 @@ bg = glitcher.glitch_image(bg, randint(1, 8), color_offset=True)
 bg.paste(plant, (rnd_coordinates()), plant.convert("RGBA"))
 
 # draw .word
-words = np.genfromtxt('words.csv', dtype=str)
 x, y = place_coord(bg, 0.05, 0.9)
 draw_words('.' + words[randint(0, len(words) - 1)], bg, 256, "ffffff", x, y)
 
 # draw one letter
-letters = np.genfromtxt('letters.csv', dtype=str)
 x_letter, y_letter = place_coord(bg, 0.75, 0.02)
 draw_words(letters[randint(0,
                            len(letters) - 1)], bg, 512, "ffffff", x_letter,
@@ -144,18 +164,11 @@ draw_words(str(randint(0, 100)), bg, 96, "ffffff", x_letter * 1.2,
 
 # draw multiline text
 x, y = place_coord(bg, 0.2, 0.4)
-phrases = [
-    'What\ninspires\nyou?', 'What\ninspires\nyou?',
-    'Am I\nusing my\ntime wisely?', 'Am I taking \nanything for\ngranted?',
-    'Am I employing\na healthy perspective?', 'Am I living\ntrue to myself?',
-    'Am I waking up\nin the morning ready\nto take on the day?',
-    'Am I taking\ncare of myself\nphysically?',
-    'Am I achieving\nthe goals that I have\nset for myself?',
-    'Who am I, really?'
-]
 
 x, y = place_coord(bg, 0.1, 0.1)
-draw_multiline(phrases[randint(0, len(phrases) - 1)], bg, 128, x, y_letter * 2)
+draw_multiline(questions[randint(0,
+                                 len(questions) - 1)], bg, 128, x,
+               y_letter * 2)
 
 border.paste(bg, (int(border.width * 0.045), int(border.height * 0.035)),
              bg.convert("RGBA"))
